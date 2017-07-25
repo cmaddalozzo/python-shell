@@ -53,6 +53,7 @@ var PythonShell = function (script, options) {
     this.script = path.join(options.scriptPath || './', script);
     this.command = pythonOptions.concat(this.script, scriptArgs);
     this.mode = options.mode || 'text';
+    this.stdErrMaxBufferSize = options.stdErrMaxBufferSize || Infinity;
     this.formatter = resolve('format', options.formatter || this.mode);
     this.parser = resolve('parse', options.parser || this.mode);
     this.terminated = false;
@@ -70,7 +71,11 @@ var PythonShell = function (script, options) {
 
     // listen to stderr and emit errors for incoming data
     this.stderr.on('data', function (data) {
-        errorData += ''+data;
+        var tmp = errorData + data;
+        if (tmp.length >= self.stdErrMaxBufferSize) {
+          tmp = tmp.substring(tmp.length - self.stdErrMaxBufferSize, tmp.length);
+        }
+        errorData = tmp;
     });
 
     this.stderr.on('end', function(){
