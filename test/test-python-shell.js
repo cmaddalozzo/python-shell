@@ -265,6 +265,13 @@ describe('PythonShell', function () {
                 done();
             });
         });
+        it('should truncate stderr when it\'s longer than stdErrMaxBufferSize', function (done) {
+            var pyshell = new PythonShell('error.py', { stdErrMaxBufferSize: 128 });
+            pyshell.on('error', function (err) {
+                err.message.should.have.lengthOf(128);
+                done();
+            });
+        });
     });
 
     describe('.parseError(data)', function () {
